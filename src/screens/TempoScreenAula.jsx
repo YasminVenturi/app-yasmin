@@ -1,6 +1,8 @@
+import { Image } from "expo-image";
 import { useEffect, useState } from "react";
 import { View } from "react-native";
-import { Button, Searchbar, Text } from "react-native-paper";
+import { Text } from "react-native-paper";
+import styles from "../config/styles";
 
 /**
  *
@@ -11,39 +13,59 @@ import { Button, Searchbar, Text } from "react-native-paper";
  * - LEMBREI É O U... COM [] VAZIO
  * -
  */
+const API = "58f0cf79195fef97df91af42c5973568";
 
 export default function TempoScreenAula() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [temperatura, setTemperatura] = useState("");
+  const [icone, setIcone] = useState("");
   const [cidade, setCidade] = useState("Joinville");
 
   const fetchTempo = async () => {
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${cidade}&appid=${API_KEY}&units=metric`;
 
-    // Faça a requisição usando Axios
-    try {
-      const response = await axios.get(url);
-      console.log(response.data);
-      // // A resposta está disponível no objeto response.data
-
-      setTempoData(response.data);
-    } catch (error) {
-      // Trate o erro
-      console.error("There was an error!", error);
-    }
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${cidade}&appid=${API}&units=metric`;
+    // vou lá buscar o JSON na internet
+    const resposta = await fetch(URL);
+    // recebo essa informação e converto ela em programação que é JSON
+    const data = await resposta.json();
+    console.log(resposta); // formato texto
+    console.log(data); // já está convertido pra JSON
+    setTemperatura(data);
+    setIcone(data.weather[0].icon);
   };
 
   useEffect(() => {
-    console.log(cidade);
-  }, [cidade]);
+    fetchTempo();
+  }, []);
+  // array vazio no final de useEffect simula simboliza
+  // que a função será executada apenas uma vez, quando o componente for montado
 
   return (
-    <View>
-      <Searchbar
-        placeholder="Search"
-        onChangeText={setSearchQuery}
-        value={searchQuery}
-      />
-      <Button onPress={() => setCidade(searchQuery)}>Buscar</Button>
+    <View style={styles.container}>
+      {icone && (
+        <>
+          <Text
+            variant="displayMedium"
+            style={{ textAlign: "center", marginVertical: 10 }}
+          >
+            Temperatura em Joinville
+          </Text>
+          <Image
+            source={{
+              uri: `https://openweathermap.org/img/wn/${icone}@2x.png`,
+            }}
+            style={{
+              width: 100,
+              height: 100,
+              backgroundColor: "white",
+              borderRadius: 200,
+            }}
+          />
+        </>
+      )}
+      <Text variant="headlineSmall">Informações</Text>
+      <Text>Temperatura atual: {temperatura?.main?.temp}</Text>
+      <Text>Temperatura Máxima: {temperatura?.main?.temp_max}</Text>
+      <Text>Temperatura Minima: {temperatura?.main?.temp_min}</Text>
     </View>
   );
 }
